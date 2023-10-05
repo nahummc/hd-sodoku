@@ -181,37 +181,37 @@ class SudokuBoard extends Component {
   // }
   
   pokeHoles = (startingBoard, holes) => {
-    const removedVals = [];
-    const val = this.shuffle(this.range(0, 80));
-    let boardCopy = JSON.parse(JSON.stringify(startingBoard)); // Deep copy
+    // const removedVals = [];
+    // const val = this.shuffle(this.range(0, 80));
+    // let boardCopy = JSON.parse(JSON.stringify(startingBoard)); // Deep copy
   
-    while (removedVals.length < holes) {
-      const nextVal = val.pop();
-      if (nextVal === undefined) throw new Error("Impossible Game");
-      const randomRowIndex = Math.floor(nextVal / 9);
-      const randomColIndex = nextVal % 9;
+    // while (removedVals.length < holes) {
+    //   const nextVal = val.pop();
+    //   if (nextVal === undefined) throw new Error("Impossible Game");
+    //   const randomRowIndex = Math.floor(nextVal / 9);
+    //   const randomColIndex = nextVal % 9;
   
-      if (boardCopy[randomRowIndex][randomColIndex] === 0) continue;
+    //   if (boardCopy[randomRowIndex][randomColIndex] === 0) continue;
   
-      const tempVal = boardCopy[randomRowIndex][randomColIndex];
-      boardCopy[randomRowIndex][randomColIndex] = 0;
+    //   const tempVal = boardCopy[randomRowIndex][randomColIndex];
+    //   boardCopy[randomRowIndex][randomColIndex] = 0;
   
-      const proposedBoard = JSON.parse(JSON.stringify(boardCopy));
+    //   const proposedBoard = JSON.parse(JSON.stringify(boardCopy));
   
-      if (multiplePossibleSolutions(proposedBoard)) {
-        boardCopy[randomRowIndex][randomColIndex] = tempVal; // Restore value
-      } else {
-        removedVals.push({
-          rowIndex: randomRowIndex,
-          colIndex: randomColIndex,
-          val: tempVal,
-        });
-      }
-    }
+    //   if (multiplePossibleSolutions(proposedBoard)) {
+    //     boardCopy[randomRowIndex][randomColIndex] = tempVal; // Restore value
+    //   } else {
+    //     removedVals.push({
+    //       rowIndex: randomRowIndex,
+    //       colIndex: randomColIndex,
+    //       val: tempVal,
+    //     });
+    //   }
+    // }
   
-    console.log("removedVals: ", removedVals);
-    console.log("boardCopy: ", boardCopy);
-    return [removedVals, boardCopy];
+    // console.log("removedVals: ", removedVals);
+    // console.log("boardCopy: ", boardCopy);
+    // return [removedVals, boardCopy];
   };
   
 
@@ -286,9 +286,10 @@ class SudokuBoard extends Component {
         </View>
         <Button title="Generate Sudoku Board" onPress={this.initBoard} />
         <Button
-        title="Poke Holes"
-        onPress={this.pokeHoles}
-      />
+            title="Poke Holes"
+            onPress={() => this.pokeHoles(argument1, argument2)} // Replace argument1 and argument2 with your actual arguments
+          />
+
       </View>
     );
   }
