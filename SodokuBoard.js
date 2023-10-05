@@ -39,7 +39,7 @@ class SudokuBoard extends Component {
     // Initialize the board when the component mounts
     this.initBoard(true);
   }
-  
+
   initBoard = (blank) => {
     try {
       // if (blank) {
@@ -50,6 +50,7 @@ class SudokuBoard extends Component {
         JSON.parse(JSON.stringify(this.state.blankBoard))
       );
       this.setState({ board: filledBoard });
+      console.log("filledBoard: ", filledBoard);
     } catch (error) {
       console.error("Error generating board:", error);
     }
@@ -62,38 +63,31 @@ class SudokuBoard extends Component {
       this.boxSafe(puzzleArray, emptyCell, num)
     );
   };
-
   rowSafe = (puzzleArray, emptyCell, num) => {
-    // -1 is return value of .find() if value not found
-    return puzzleArray[emptyCell.rowIndex].indexOf(num) == -1;
+    return !puzzleArray[emptyCell.rowIndex].includes(num);
   };
 
   colSafe = (puzzleArray, emptyCell, num) => {
-    return !puzzleArray.some((row) => row[emptyCell.colIndex] == num);
+    return !puzzleArray.some((row) => row[emptyCell.colIndex] === num);
+  };
+
+  boxSafe = (puzzleArray, emptyCell, num) => {
+    let boxStartRow = Math.floor(emptyCell.rowIndex / 3) * 3;
+    let boxStartCol = Math.floor(emptyCell.colIndex / 3) * 3;
+    for (let i = 0; i < 3; i++) {
+      for (let j = 0; j < 3; j++) {
+        if (puzzleArray[boxStartRow + i][boxStartCol + j] === num) {
+          return false;
+        }
+      }
+    }
+    return true;
   };
 
   // puzzleArray is the game board being solved. A 9x9 matrix
   // emptyCell = {rowIndex: INT , colIndex: INT } INT = coordinates of currently empty cell
   // num = integer value 1-9 being tested
 
-  boxSafe = (puzzleArray, emptyCell, num) => {
-    // Define top left corner of box region for empty cell
-    boxStartRow = emptyCell.rowIndex - (emptyCell.rowIndex % 3);
-    boxStartCol = emptyCell.colIndex - (emptyCell.colIndex % 3);
-    let safe = true;
-
-    for (boxRow of [0, 1, 2]) {
-      // Each box region has 3 rows
-      for (boxCol of [0, 1, 2]) {
-        // Each box region has 3 columns
-        // Is num is present in box region?
-        if (puzzleArray[boxStartRow + boxRow][boxStartCol + boxCol] == num) {
-          safe = false; // If number is found, it is not safe to place
-        }
-      }
-    }
-    return safe;
-  };
 
   nextEmptyCell = (puzzleArray) => {
     const emptyCell = { rowIndex: "", colIndex: "" };
@@ -125,21 +119,6 @@ class SudokuBoard extends Component {
     return newArray;
   };
 
-  boxSafe = (puzzleArray, emptyCell, num) => {
-    let boxStartRow = emptyCell.rowIndex - (emptyCell.rowIndex % 3);
-    let boxStartCol = emptyCell.colIndex - (emptyCell.colIndex % 3);
-    let safe = true;
-
-    for (let boxRow of [0, 1, 2]) {
-      for (let boxCol of [0, 1, 2]) {
-        if (puzzleArray[boxStartRow + boxRow][boxStartCol + boxCol] === num) {
-          safe = false;
-        }
-      }
-    }
-    return safe;
-  };
-
 
   fillPuzzle = (startingBoard) => {
     const emptyCell = this.nextEmptyCell(startingBoard);
@@ -151,7 +130,6 @@ class SudokuBoard extends Component {
     for (const num of this.shuffle(this.state.numArray)) {
       this.state.counter++;
       if (this.state.counter > 20_000_000) throw new Error("Recursion Timeout");
-
 
       if (this.safeToPlace(startingBoard, emptyCell, num)) {
         startingBoard[emptyCell.rowIndex][emptyCell.colIndex] = num;
@@ -173,76 +151,102 @@ class SudokuBoard extends Component {
     }
     return result;
   };
+  isValid(board, row, col, num) {
+    for (let x = 0; x < 9; x++) {
+      if (
+        board[row][x] === num ||
+        board[x][col] === num ||
+        board[3 * Math.floor(row / 3) + Math.floor(x / 3)][
+          3 * Math.floor(col / 3) + (x % 3)
+        ] === num
+      ) {
+        return false;
+      }
+    }
+    return true;
+  };
 
-  // pokeHoles = () => {
-  //   const newBoard = this.state.board.map(row => row.slice());
-  //   const [removedVals, pokedBoard] = this.pokeHoles(newBoard, 20);
-  //   this.setState({ board: pokedBoard });
-  // }
-  
-  pokeHoles = (startingBoard, holes) => {
-    // const removedVals = [];
-    // const val = this.shuffle(this.range(0, 80));
-    // let boardCopy = JSON.parse(JSON.stringify(startingBoard)); // Deep copy
-  
-    // while (removedVals.length < holes) {
-    //   const nextVal = val.pop();
-    //   if (nextVal === undefined) throw new Error("Impossible Game");
-    //   const randomRowIndex = Math.floor(nextVal / 9);
-    //   const randomColIndex = nextVal % 9;
-  
-    //   if (boardCopy[randomRowIndex][randomColIndex] === 0) continue;
-  
-    //   const tempVal = boardCopy[randomRowIndex][randomColIndex];
-    //   boardCopy[randomRowIndex][randomColIndex] = 0;
-  
-    //   const proposedBoard = JSON.parse(JSON.stringify(boardCopy));
-  
-    //   if (multiplePossibleSolutions(proposedBoard)) {
-    //     boardCopy[randomRowIndex][randomColIndex] = tempVal; // Restore value
-    //   } else {
-    //     removedVals.push({
-    //       rowIndex: randomRowIndex,
-    //       colIndex: randomColIndex,
-    //       val: tempVal,
-    //     });
-    //   }
+  countSolutions(board, count) {
+    for (let row = 0; row < 9; row++) {
+      for (let col = 0; col < 9; col++) {
+        if (board[row][col] === 0) {
+          for (let num = 1; num <= 9; num++) {
+            if (this.isValid(board, row, col, num)) {
+              board[row][col] = num;
+              count = this.countSolutions(board, count);
+              board[row][col] = 0;
+            }
+          }
+          return count;
+        }
+      }
+    }
+    return count + 1;
+  };
+
+  pokeHoles(fb, holes) {
+    // Make sure filledBoard is valid before deep cloning
+    // if (!fb || !Array.isArray(fb) || fb.length !== 9) {
+    //   console.error("Invalid fb");
+    //   return;
     // }
   
-    // console.log("removedVals: ", removedVals);
-    // console.log("boardCopy: ", boardCopy);
-    // return [removedVals, boardCopy];
-  };
+    try {
+      console.log("fb: ", fb);
+      console.log("holes: ", holes)
+      const board = JSON.parse(JSON.stringify(fb));
+      let pokedHoles = 0;
+  
+      while (pokedHoles < holes) {
+        const row = Math.floor(Math.random() * 9);
+        const col = Math.floor(Math.random() * 9);
+  
+        if (board[row][col] !== 0) {
+          const temp = board[row][col];
+          board[row][col] = 0;
+  
+          if (this.countSolutions(JSON.parse(JSON.stringify(board)), 0) === 1) {
+            pokedHoles++;
+          } else {
+            board[row][col] = temp;
+          }
+        }
+      }
+  
+      console.log("board: ", board)
+      this.setState({ board });
+      return board;
+  
+    } catch (error) {
+      console.error("An error occurred:", error);
+    }
+  }
   
 
-  multiplePossibleSolutions (boardToCheck) {
-    const possibleSolutions = []
-    const emptyCellArray = emptyCellCoords(boardToCheck)
+  multiplePossibleSolutions(boardToCheck) {
+    const possibleSolutions = [];
+    const emptyCellArray = emptyCellCoords(boardToCheck);
     for (let index = 0; index < emptyCellArray.length; index++) {
       // Rotate a clone of the emptyCellArray by one for each iteration
-      emptyCellClone = [...emptyCellArray]
+      emptyCellClone = [...emptyCellArray];
       const startingPoint = emptyCellClone.splice(index, 1);
-      emptyCellClone.unshift( startingPoint[0] ) 
-      thisSolution = fillFromArray( boardToCheck.map( row => row.slice() ) , emptyCellClone)
-      possibleSolutions.push( thisSolution.join() )
-      if (Array.from(new Set(possibleSolutions)).length > 1 ) return true
+      emptyCellClone.unshift(startingPoint[0]);
+      thisSolution = fillFromArray(
+        boardToCheck.map((row) => row.slice()),
+        emptyCellClone
+      );
+      possibleSolutions.push(thisSolution.join());
+      if (Array.from(new Set(possibleSolutions)).length > 1) return true;
     }
-    return false
+    return false;
   }
 
   handleCellPress = (row, col) => {
-    const { selectedNumber } = this.state;
-    console.log("row: ", row);
-    console.log("col: ", col);
-
+    const { selectedNumber, board } = this.state;
     if (selectedNumber !== null) {
-      // Update the specific cell with the selected number
-      const updatedBoard = [...this.state.board];
+      const updatedBoard = [...board];
       updatedBoard[row][col] = selectedNumber;
-
-      this.setState({
-        board: updatedBoard,
-      });
+      this.setState({ board: updatedBoard });
     }
   };
 
@@ -286,10 +290,10 @@ class SudokuBoard extends Component {
         </View>
         <Button title="Generate Sudoku Board" onPress={this.initBoard} />
         <Button
-            title="Poke Holes"
-            onPress={() => this.pokeHoles(argument1, argument2)} // Replace argument1 and argument2 with your actual arguments
-          />
-
+          title="Poke Holes"
+          onPress={() => this.pokeHoles(this.state.board, 30)} 
+        />
+        <Button title="debug" onPress={() => console.log(this.state.board)} />
       </View>
     );
   }
