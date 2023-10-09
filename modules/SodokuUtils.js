@@ -39,23 +39,114 @@ export const shuffle = (array) => {
   };
   
   export const nextEmptyCell = (puzzleArray) => {
-    // ... (same code)
-  };
+    const emptyCell = { rowIndex: "", colIndex: "" };
+
+    puzzleArray.forEach((row, rowIndex) => {
+      // If this key has already been assigned, skip iteration
+      if (emptyCell.colIndex !== "") return;
+
+      // find first zero-element
+      let firstZero = row.find((col) => col === 0);
+
+      // if no zero present, skip to next row
+      if (firstZero === undefined) return;
+      emptyCell.rowIndex = rowIndex;
+      emptyCell.colIndex = row.indexOf(firstZero);
+    })};
   
-  export const fillPuzzle = (startingBoard, numArray, counter) => {
-    // ... (same code, but use the arguments instead of 'this.state')
-  };
+    export const fillPuzzle = (startingBoard, numArray, counter) => {
+        const emptyCell = nextEmptyCell(startingBoard);
+      
+        if (!emptyCell) {
+          return startingBoard;
+        }
+      
+        for (const num of shuffle(numArray)) {
+          counter++;
+          if (counter > 20_000_000) throw new Error("Recursion Timeout");
+      
+          if (safeToPlace(startingBoard, emptyCell, num, rowSafe, colSafe, boxSafe)) {
+            startingBoard[emptyCell.rowIndex][emptyCell.colIndex] = num;
+      
+            if (fillPuzzle(startingBoard, numArray, counter)) {
+              return startingBoard;
+            }
+      
+            startingBoard[emptyCell.rowIndex][emptyCell.colIndex] = 0;
+          }
+        }
+        return false;
+      };
   
-  export const pokeHoles = (fb, holes, countSolutions) => {
-    // ... (same code, but use the arguments instead of 'this.state')
-  };
+  export const pokeHoles = (fb, holes) => {
+    // Make sure filledBoard is valid before deep cloning
+    // if (!fb || !Array.isArray(fb) || fb.length !== 9) {
+    //   console.error("Invalid fb");
+    //   return;
+    // }
   
-  export const countSolutions = (board, count, isValid) => {
-    // ... (same code, but use the arguments instead of 'this.state')
+    try {
+      console.log("fb: ", fb);
+      console.log("holes: ", holes)
+      const board = JSON.parse(JSON.stringify(fb));
+      let pokedHoles = 0;
+  
+      while (pokedHoles < holes) {
+        const row = Math.floor(Math.random() * 9);
+        const col = Math.floor(Math.random() * 9);
+  
+        if (board[row][col] !== 0) {
+          const temp = board[row][col];
+          board[row][col] = 0;
+  
+          if (this.countSolutions(JSON.parse(JSON.stringify(board)), 0) === 1) {
+            pokedHoles++;
+          } else {
+            board[row][col] = temp;
+          }
+        }
+      }
+  
+      console.log("board: ", board)
+      this.setState({ board });
+      return board;
+  
+    } catch (error) {
+      console.error("An error occurred:", error);
+    }
+  }
+  
+  export const countSolutions = (board, count) => {
+    for (let row = 0; row < 9; row++) {
+      for (let col = 0; col < 9; col++) {
+        if (board[row][col] === 0) {
+          for (let num = 1; num <= 9; num++) {
+            if (this.isValid(board, row, col, num)) {
+              board[row][col] = num;
+              count = this.countSolutions(board, count);
+              board[row][col] = 0;
+            }
+          }
+          return count;
+        }
+      }
+    }
+    return count + 1;
   };
   
   export const isValid = (board, row, col, num) => {
-    // ... (same code)
+    for (let x = 0; x < 9; x++) {
+      if (
+        board[row][x] === num ||
+        board[x][col] === num ||
+        board[3 * Math.floor(row / 3) + Math.floor(x / 3)][
+          3 * Math.floor(col / 3) + (x % 3)
+        ] === num
+      ) {
+        return false;
+      }
+    }
+    return true;
   };
   
   // Add more utility functions here
