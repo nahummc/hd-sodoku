@@ -1,6 +1,7 @@
 import React, { Component } from 'react';
 import { View, Pressable, Text, StyleSheet, Button } from 'react-native';
 
+
 class SudokuBoard extends Component {
   constructor(props) {
     super(props);
@@ -17,17 +18,6 @@ class SudokuBoard extends Component {
         [0, 0, 0, 0, 0, 0, 0, 0, 0],
         [0, 0, 0, 0, 0, 0, 0, 0, 0],
       ],
-      // stringBoard: [
-      //   ["", "", "", "", "", "", "", "", ""],
-      //   ["", "", "", "", "", "", "", "", ""],
-      //   ["", "", "", "", "", "", "", "", ""],
-      //   ["", "", "", "", "", "", "", "", ""],
-      //   ["", "", "", "", "", "", "", "", ""],
-      //   ["", "", "", "", "", "", "", "", ""],
-      //   ["", "", "", "", "", "", "", "", ""],
-      //   ["", "", "", "", "", "", "", "", ""],
-      //   ["", "", "", "", "", "", "", "", ""],
-      // ],
       board: [],
       numArray: [1, 2, 3, 4, 5, 6, 7, 8, 9],
       selectedNumber: null,
@@ -67,31 +57,6 @@ class SudokuBoard extends Component {
     }
   };
 
-  // initBoard = (blank) => {
-  //   try {
-  // //console.log("initBoard");
-  //     // Uncomment the following lines if you want to start with a blank board
-  //     // if (blank) {
-  //     //   this.setState({ board: this.state.blankBoard });
-  //     //   return;
-  //     // }
-
-  //     // Generate a filled Sudoku board
-  //     const filledBoard = this.fillPuzzle(
-  //       JSON.parse(JSON.stringify(this.state.blankBoard))
-  //     );
-  //     this.setState({ board: filledBoard });
-
-  //     // Find and set all possible solutions
-  //     const solutions = [];
-  //     this.fillPuzzle(JSON.parse(JSON.stringify(this.state.blankBoard)), solutions);
-  //     this.setState({ possibleSolutions: solutions });
-
-  //     //console.log("filledBoard: ", filledBoard);
-  //   } catch (error) {
-  //     console.error("Error generating board:", error);
-  //   }
-  // };
 
   safeToPlace = (puzzleArray, emptyCell, num) => {
     return (
@@ -121,9 +86,6 @@ class SudokuBoard extends Component {
     return true;
   };
 
-  // puzzleArray is the game board being solved. A 9x9 matrix
-  // emptyCell = {rowIndex: INT , colIndex: INT } INT = coordinates of currently empty cell
-  // num = integer value 1-9 being tested
 
   nextEmptyCell = (puzzleArray) => {
     const emptyCell = { rowIndex: "", colIndex: "" };
@@ -178,29 +140,6 @@ class SudokuBoard extends Component {
     }
     return false;
   };
-
-  // fillPuzzle = (startingBoard, solutions = [], counter = 0) => {
-  //   // Limit the number of recursive calls
-  //   if (counter > 10) {
-  //     console.error("Recursion limit reached");
-  //     return;
-  //   }
-  
-  //   const emptyCell = this.nextEmptyCell(startingBoard);
-  
-  //   if (!emptyCell) {
-  //     solutions.push(JSON.parse(JSON.stringify(startingBoard)));
-  //     return;
-  //   }
-  
-  //   for (const num of this.shuffle(this.state.numArray)) {
-  //     if (this.safeToPlace(startingBoard, emptyCell, num)) {
-  //       startingBoard[emptyCell.rowIndex][emptyCell.colIndex] = num;
-  //       // this.fillPuzzle(startingBoard, solutions, counter + 1);  // Increment counter here
-  //       startingBoard[emptyCell.rowIndex][emptyCell.colIndex] = 0;
-  //     }
-  //   }
-  // };
   
 
   range = (start, end) => {
@@ -359,21 +298,6 @@ class SudokuBoard extends Component {
     return this.isCompleteAndCorrect(grid);
   };
 
-  // isGridComplete = (board) => {
-  //   //console.log("state board: " + this.state.board);
-  //   //console.log("this.board: " + this.board);
-  //   //console.log("just board: " + board);
-  //   const grids = Array.from({ length: 9 }, () => []);
-    
-  //   for (let row = 0; row < 9; row++) {
-  //     for (let col = 0; col < 9; col++) {
-  //       const gridIndex = Math.floor(row / 3) * 3 + Math.floor(col / 3);
-  //       grids[gridIndex].push(board[row][col]);
-  //     }
-  //   }
-    
-  //   return grids.every(grid => new Set(grid.filter(cell => cell !== 0)).size === 9);
-  // };
 
   isGridComplete = (board) => {
     for (let gridRow = 0; gridRow < 9; gridRow += 3) {
@@ -393,37 +317,6 @@ class SudokuBoard extends Component {
   };
   
   
-  
-
-  // validateUserInput = (row, col, num) => {
-  //   const { listOfSolutions, board } = this.state;
-    
-  //   if (!listOfSolutions) {
-  //     console.warn("listOfSolutions is not yet initialized.");
-  //     return;
-  //   }
-    
-  //   let validSolutions = {};
-  //   for (const [key, solution] of Object.entries(listOfSolutions)) {
-  //     if (solution[row][col] === num) {
-  //       validSolutions[key] = solution;
-  //     }
-  //   }
-
-  //   if (Object.keys(validSolutions).length === 0) {
-  //     this.setState({ feedbackMessage: 'Incorrect move' });
-  //   } else {
-  //     const rowComplete = this.checkRow(row);
-  //     const colComplete = this.checkColumn(col);
-  //     const gridComplete = this.checkGrid(row, col);
-      
-  //     this.setState({ 
-  //       listOfSolutions: validSolutions, 
-  //       feedbackMessage: 'Correct move',
-  //     });
-  //   }
-  // };
-
   validateUserInput = (row, col, num) => {
     const { listOfSolutions } = this.state;
   
@@ -451,27 +344,7 @@ class SudokuBoard extends Component {
     }
   };
   
-  
-  
 
-  // handleCellPress = (row, col) => {
-  //   //console.log("handleCellPress new");
-  //   const { selectedNumber, board } = this.state;
-    
-  //   // Only proceed if the cell is empty (has a value of 0)
-  //   if (board[row][col] !== 0) {
-  //     console.warn("Cell is already filled");
-  //     return;
-  //   }
-  
-  //   if (selectedNumber !== null) {
-  //     const updatedBoard = [...board];
-  //     updatedBoard[row][col] = selectedNumber;
-  //     this.setState({ board: updatedBoard }, () => {
-  //       this.validateUserInput(row, col, selectedNumber);
-  //     });
-  //   }
-  // };
   
   handleCellPress = (row, col) => {
     const { selectedNumber, board, incorrectCells } = this.state;

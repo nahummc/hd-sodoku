@@ -3,6 +3,13 @@
 # dependencies
 node_modules/
 
+# Build files
+build/
+dist/
+*.js
+*.css
+*.map
+
 # Expo
 .expo/
 dist/
