@@ -29,12 +29,27 @@ class Board extends Component {
     };
   }
 
+  // componentDidMount() {
+  //   // Initialize the board when the component mounts
+  //   const filledBoard = Utils.initBoard(this.state.blankBoard);
+  //   this.setState({ board: filledBoard });
+  // }
+
+  // pokeHolesInBoard = (holes) => {
+  //   const newBoard = Utils.pokeHoles(this.state.board, holes);
+  //   if (newBoard) {
+  //     this.setState({ board: newBoard });
+  //   }
+  // };
+
   componentDidMount() {
     // Initialize the board when the component mounts
     const filledBoard = Utils.initBoard(this.state.blankBoard);
-    this.setState({ board: filledBoard });
+    const listOfSolutions = {};
+    Utils.findAllSolutions(filledBoard, listOfSolutions);
+    this.setState({ board: filledBoard, listOfSolutions });
   }
-
+  
   pokeHolesInBoard = (holes) => {
     const newBoard = Utils.pokeHoles(this.state.board, holes);
     if (newBoard) {
@@ -43,40 +58,48 @@ class Board extends Component {
   };
   
   
+  
   handleCellPress = (row, col) => {
-    const { selectedNumber, board, incorrectCells, numArray } = this.state;
-
+    const { selectedNumber, board, incorrectCells, listOfSolutions } = this.state;
+  
     if (board[row][col] !== 0) {
       console.warn("Cell is already filled");
       return;
     }
-
+  
     if (selectedNumber !== null) {
       const updatedBoard = [...board];
       updatedBoard[row][col] = selectedNumber;
       this.setState({ board: updatedBoard });
-
+  
+      console.log(`Handling cell press at (${row}, ${col}) with number ${selectedNumber}`);
+      console.log("Current listOfSolutions:", listOfSolutions);
+  
       const isValid = Utils.validateUserInput(
-        row, col, selectedNumber, board, this.state.listOfSolutions
+        row, col, selectedNumber, board, listOfSolutions
       );
-
-      if (!isValid) {
+  
+      console.log("Is move valid?", isValid);
+  
+      if (isValid) {
+        this.setState({ feedbackMessage: "Correct move!" });
+      } else {
         this.setState({
+          feedbackMessage: "Incorrect move. Try again.",
           incorrectCells: [...incorrectCells, { row, col }],
         });
-
+  
         setTimeout(() => {
           updatedBoard[row][col] = 0;
-          this.setState({ 
+          this.setState({
             board: updatedBoard,
             incorrectCells: incorrectCells.filter(cell => !(cell.row === row && cell.col === col)),
+            feedbackMessage: "",  // Clear the feedback message
           });
         }, 2000); // 2 seconds delay
       }
     }
   };
-  
-  
   
 
   handleNumberButtonClick = (number) => {
@@ -141,41 +164,6 @@ class Board extends Component {
             </View>
           ))}
         </View>
-
-        {/* // comment out below */}
-
-        {/* // <View style={styles.container}>
-      // <View style={styles.grid}>
-      //   {board.map((row, rowIndex) => (
-      //     <View key={rowIndex} style={styles.row}>
-      //       {row.map((cell, colIndex) => (
-      //         <Pressable
-      //           key={colIndex}
-      //           style={[
-      //             styles.cell,
-      //             rowIndex % 3 === 2
-      //               ? { borderBottomWidth: 2, borderBottomColor: "black" }
-      //               : {},
-      //             colIndex % 3 === 2
-      //               ? { borderRightWidth: 2, borderRightColor: "black" }
-      //               : {},
-      //             incorrectCells.some(
-      //               (ic) => ic.row === rowIndex && ic.col === colIndex
-      //             )
-      //               ? styles.incorrectCell
-      //               : null,
-      //           ]}
-      //           onPress={() => this.handleCellPress(rowIndex, colIndex)}
-      //         >
-      //           <Text style={styles.cellText}>{cell !== 0 ? cell : ""}</Text>
-      //         </Pressable>
-      //       ))}
-      //     </View>
-      //   ))}
-      // </View> */}
-
-        {/* comment out above */}
-
         <View style={styles.buttonRow}>
           {[1, 2, 3, 4, 5, 6, 7, 8, 9].map((number) => (
             <Pressable
@@ -210,16 +198,11 @@ class Board extends Component {
               "this.state.listOfSolutions: ",
               this.state.listOfSolutions
             );
-            // console.log("this.state.feedbackMessage: ", this.state.feedbackMessage);
+
             console.log(
               "this.state.incorrectCells: ",
               this.state.incorrectCells
             );
-            // console.log("this.state.selectedNumber: ", this.state.selectedNumber);
-            // console.log("this.state.counter: ", this.state.counter);
-            // console.log("this.state.numArray: ", this.state.numArray);
-            // console.log("this.state.blankBoard: ", this.state.blankBoard);
-            // console.log("this.state.completedBoard: ", this.state.completedBoard);
           }}
         >
           <Text style={styles.buttonText}>Debug</Text>
