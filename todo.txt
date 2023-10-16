@@ -1,0 +1,14 @@
+GitHub Copilot: Sure, here's a todo list for your Sudoku game:
+
+1. Create a stylesheet for the game UI.
+2. Implement a function to check if the game is complete.
+3. Implement a timer that starts when the game begins and stops when the game is complete.
+4. Implement a scoring system that calculates the score based on the time taken to complete the game and the number of mistakes made.
+5. Implement a feature to allow the user to undo their moves.
+6. Implement a feature to allow the user to reset the game.
+7. Implement a feature to allow the user to save the game state and resume later.
+8. Implement a feature to allow the user to choose the difficulty level of the game.
+9. Implement a feature to allow the user to switch between light and dark mode.
+10. Implement a feature to allow the user to enter their name and save their high score.
+
+Let me know if you need any further assistance.
