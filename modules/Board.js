@@ -31,19 +31,17 @@ class Board extends Component {
 
   componentDidMount() {
     // Initialize the board when the component mounts
-    Utils.initBoard(true);
-
-    //console.log("componentDidMount");
-    // //console.log("this.state.blankBoard: ", this.state.blankBoard);
-    // //console.log("this.state.board: ", this.state.board);
-    //console.log("filledBoard: ", this.state.filledBoard);
+    const filledBoard = Utils.initBoard(this.state.blankBoard);
+    this.setState({ board: filledBoard });
   }
 
-  // initBoard = (blank) => {
-  //   const { board, filledBoard } = Utils.initBoard(this.state.blankBoard, blank);
-  //   this.setState({ board, filledBoard });
-  // };
-
+  pokeHolesInBoard = (holes) => {
+    const newBoard = Utils.pokeHoles(this.state.board, holes);
+    if (newBoard) {
+      this.setState({ board: newBoard });
+    }
+  };
+  
   
   handleCellPress = (row, col) => {
     const { selectedNumber, board, incorrectCells, numArray } = this.state;
@@ -102,23 +100,38 @@ class Board extends Component {
     );
     
     const gridComplete = Utils.isGridComplete(this.state.board);
+
+    
   
     return (
       <View style={styles.container}>
         <View style={styles.grid}>
           {board.map((row, rowIndex) => (
-            <View key={rowIndex} style={rowComplete[rowIndex] ? styles.completedRow : styles.row}>
+            <View
+              key={rowIndex}
+              style={rowComplete[rowIndex] ? styles.completedRow : styles.row}
+            >
               {row.map((cell, colIndex) => (
                 <Pressable
                   key={colIndex}
                   style={[
                     styles.cell,
-                    rowIndex % 3 === 2 ? { borderBottomWidth: 2, borderBottomColor: "black" } : {},
-                    colIndex % 3 === 2 ? { borderRightWidth: 2, borderRightColor: "black" } : {},
-                    incorrectCells.some((ic) => ic.row === rowIndex && ic.col === colIndex)
+                    rowIndex % 3 === 2
+                      ? { borderBottomWidth: 2, borderBottomColor: "black" }
+                      : {},
+                    colIndex % 3 === 2
+                      ? { borderRightWidth: 2, borderRightColor: "black" }
+                      : {},
+                    incorrectCells.some(
+                      (ic) => ic.row === rowIndex && ic.col === colIndex
+                    )
                       ? styles.incorrectCell
                       : null,
-                    rowComplete[rowIndex] || colComplete[colIndex] || gridComplete ? styles.completedCell : null,
+                    rowComplete[rowIndex] ||
+                    colComplete[colIndex] ||
+                    gridComplete
+                      ? styles.completedCell
+                      : null,
                   ]}
                   onPress={() => this.handleCellPress(rowIndex, colIndex)}
                 >
@@ -129,9 +142,9 @@ class Board extends Component {
           ))}
         </View>
 
-{/* // comment out below */}
+        {/* // comment out below */}
 
-      {/* // <View style={styles.container}>
+        {/* // <View style={styles.container}>
       // <View style={styles.grid}>
       //   {board.map((row, rowIndex) => (
       //     <View key={rowIndex} style={styles.row}>
@@ -161,7 +174,7 @@ class Board extends Component {
       //   ))}
       // </View> */}
 
-      {/* comment out above */}
+        {/* comment out above */}
 
         <View style={styles.buttonRow}>
           {[1, 2, 3, 4, 5, 6, 7, 8, 9].map((number) => (
@@ -177,31 +190,36 @@ class Board extends Component {
             </Pressable>
           ))}
         </View>
-        <Pressable style={styles.button} onPress={this.initBoard}>
+        <Pressable style={styles.button} onPress={Utils.initBoard}>
           <Text style={styles.buttonText}>Generate Sudoku Board</Text>
         </Pressable>
         <Pressable
           style={styles.button}
-          onPress={() => this.pokeHoles(this.state.board, 10)}
+          onPress={() => this.pokeHolesInBoard(10)}
         >
           <Text style={styles.buttonText}>Poke Holes</Text>
         </Pressable>
+
         <Pressable
           style={styles.button}
           onPress={() => {
             // debug logic
             console.log("this.state.board: ", this.state.board);
             console.log("this.state.filledBoard: ", this.state.filledBoard);
-            console.log("this.state.listOfSolutions: ", this.state.listOfSolutions);
+            console.log(
+              "this.state.listOfSolutions: ",
+              this.state.listOfSolutions
+            );
             // console.log("this.state.feedbackMessage: ", this.state.feedbackMessage);
-            console.log("this.state.incorrectCells: ", this.state.incorrectCells);
+            console.log(
+              "this.state.incorrectCells: ",
+              this.state.incorrectCells
+            );
             // console.log("this.state.selectedNumber: ", this.state.selectedNumber);
             // console.log("this.state.counter: ", this.state.counter);
             // console.log("this.state.numArray: ", this.state.numArray);
             // console.log("this.state.blankBoard: ", this.state.blankBoard);
             // console.log("this.state.completedBoard: ", this.state.completedBoard);
-
-
           }}
         >
           <Text style={styles.buttonText}>Debug</Text>
