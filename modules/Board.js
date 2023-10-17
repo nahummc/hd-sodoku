@@ -1,7 +1,12 @@
 import React, { Component } from "react";
-import { View, Pressable, Text, StyleSheet, Button, Modal } from "react-native";
+import { View, Text, Modal, StyleSheet, Pressable } from "react-native";
 import * as Utils from "./SudokuUtils";
-import DifficultyPopup from "./DifficultyPopup";
+import Grid from './Grid';
+import NumberButtons from './NumberButtons';
+import DebugButtons from './DebugButtons';
+import FeedbackArea from './FeedbackArea';
+import DifficultyPopup from './DifficultyPopup';
+
 
 class Board extends Component {
   constructor(props) {
@@ -249,94 +254,25 @@ class Board extends Component {
 
     const gridComplete = Utils.isGridComplete(this.state.board);
 
-    return (
-      <View style={styles.container}>
-        <View style={styles.grid}>
-          {board.map((row, rowIndex) => (
-            <View
-              key={rowIndex}
-              style={rowComplete[rowIndex] ? styles.completedRow : styles.row}
-            >
-              {row.map((cell, colIndex) => (
-                <Pressable
-                  key={colIndex}
-                  style={[
-                    styles.cell,
-                    rowIndex % 3 === 2
-                      ? { borderBottomWidth: 2, borderBottomColor: "black" }
-                      : {},
-                    colIndex % 3 === 2
-                      ? { borderRightWidth: 2, borderRightColor: "black" }
-                      : {},
-                    incorrectCells.some(
-                      (ic) => ic.row === rowIndex && ic.col === colIndex
-                    )
-                      ? styles.incorrectCell
-                      : null,
-                    rowComplete[rowIndex] ||
-                    colComplete[colIndex] ||
-                    gridComplete
-                      ? styles.completedCell
-                      : null,
-                  ]}
-                  onPress={() => this.handleCellPress(rowIndex, colIndex)}
-                >
-                  <Text style={styles.cellText}>{cell !== 0 ? cell : ""}</Text>
-                </Pressable>
-              ))}
-            </View>
-          ))}
-        </View>
-        <View style={styles.buttonRow}>
-          {[1, 2, 3, 4, 5, 6, 7, 8, 9].map((number) => (
-            <Pressable
-              key={number}
-              disabled={this.state.numberCount[number] === 0}
-              style={[
-                styles.button,
-                selectedNumber === number ? styles.selectedButton : null,
-                this.state.numberCount[number] === 0
-                  ? styles.disabledButton
-                  : null,
-              ]}
-              onPress={() => this.handleNumberButtonClick(number)}
-            >
-              <Text style={styles.buttonText}>{number}</Text>
-            </Pressable>
-          ))}
-        </View>
+
+
+      return (
+      <View>
+        <Grid board={this.state.board} handleCellPress={this.handleCellPress} incorrectCells={this.state.incorrectCells} />
+        <NumberButtons 
+        handleNumberButtonClick={this.handleNumberButtonClick} 
+        numberCount={this.state.numberCount} 
+        selectedNumber={this.state.selectedNumber}  // Pass down selectedNumber
+      />
+        <DebugButtons pokeHolesInBoard={this.pokeHolesInBoard} />
+        <FeedbackArea feedbackMessage={this.state.feedbackMessage} />
         <Pressable
           style={styles.button}
           onPress={() => this.setState({ isPopupVisible: true })}
         >
           <Text style={styles.buttonText}>New Game</Text>
         </Pressable>
-        <Pressable
-          style={styles.button}
-          onPress={() => this.pokeHolesInBoard(5)}
-        >
-          <Text style={styles.buttonText}>Poke Holes</Text>
-        </Pressable>
-        <Pressable
-          style={styles.button}
-          onPress={() => {
-            console.log("this.state.board: ", this.state.board);
-            console.log("this.state.filledBoard: ", this.state.filledBoard);
-            console.log(
-              "this.state.listOfSolutions: ",
-              this.state.listOfSolutions
-            );
-            console.log(
-              "this.state.incorrectCells: ",
-              this.state.incorrectCells
-            );
-            console.log("this.state.numberCount: ", this.state.numberCount);
-          }}
-        >
-          <Text style={styles.buttonText}>Debug</Text>
-        </Pressable>
-        <Text>{this.state.feedbackMessage}</Text>
-
+        
         <Modal
           animationType="slide"
           transparent={true}

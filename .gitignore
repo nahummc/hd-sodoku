@@ -40,3 +40,7 @@ yarn-error.*
 
 # typescript
 *.tsbuildinfo
+
+# misc
+*.txt
+old_copy.js
