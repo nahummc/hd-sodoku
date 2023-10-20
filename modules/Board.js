@@ -50,27 +50,24 @@ class Board extends Component {
 
   componentDidMount() {
     // Initialize the board when the component mounts
-    const filledBoard = Utils.initBoard(this.state.blankBoard);
-    const listOfSolutions = {};
-    Utils.findAllSolutions(filledBoard, listOfSolutions);
-
-    // Initialize numberCount based on filledBoard
-    const initialNumberCount = Array(9).fill(0);
-    filledBoard.forEach((row) => {
-      row.forEach((num) => {
-        if (num !== 0) {
-          initialNumberCount[num - 1]++;
-        }
-      });
-    });
-
-    const numberCount = {};
-    for (let i = 1; i <= 9; i++) {
-      numberCount[i] = 9 - initialNumberCount[i - 1];
-    }
-
-    this.setState({ board: filledBoard, listOfSolutions, numberCount });
-    console.log("Initial numberCount:", numberCount);
+    // const filledBoard = Utils.initBoard(this.state.blankBoard);
+    // const listOfSolutions = {};
+    // Utils.findAllSolutions(filledBoard, listOfSolutions);
+    // // Initialize numberCount based on filledBoard
+    // const initialNumberCount = Array(9).fill(0);
+    // filledBoard.forEach((row) => {
+    //   row.forEach((num) => {
+    //     if (num !== 0) {
+    //       initialNumberCount[num - 1]++;
+    //     }
+    //   });
+    // });
+    // const numberCount = {};
+    // for (let i = 1; i <= 9; i++) {
+    //   numberCount[i] = 9 - initialNumberCount[i - 1];
+    // }
+    // this.setState({ board: filledBoard, listOfSolutions, numberCount });
+    // console.log("Initial numberCount:", numberCount);
   }
 
   pokeHolesInBoard = (holes) => {
@@ -91,23 +88,24 @@ class Board extends Component {
   };
 
   handleCellPress = (row, col) => {
-    const { selectedNumber, board, incorrectCells, listOfSolutions } = this.state;
-  
+    const { selectedNumber, board, incorrectCells, listOfSolutions } =
+      this.state;
+
     if (board[row][col] !== 0) {
       console.warn("Cell is already filled");
       return;
     }
-  
+
     if (selectedNumber !== null) {
       const updatedBoard = [...board];
       updatedBoard[row][col] = selectedNumber;
       this.setState({ board: updatedBoard });
-  
+
       console.log(
         `Handling cell press at (${row}, ${col}) with number ${selectedNumber}`
       );
       console.log("Current listOfSolutions:", listOfSolutions);
-  
+
       const isValid = Utils.validateUserInput(
         row,
         col,
@@ -115,11 +113,11 @@ class Board extends Component {
         board,
         listOfSolutions
       );
-  
+
       console.log("Is move valid?", isValid);
-  
+
       if (isValid) {
-        this.updateNumberCount(selectedNumber);  // Update the number count only if the move is valid
+        this.updateNumberCount(selectedNumber); // Update the number count only if the move is valid
         this.setState({ feedbackMessage: "Correct move!" });
       } else {
         this.setState({
@@ -129,7 +127,7 @@ class Board extends Component {
 
         // log number counts
         console.log(" handle press numberCount:", this.state.numberCount);
-  
+
         setTimeout(() => {
           updatedBoard[row][col] = 0;
           this.setState({
@@ -143,8 +141,6 @@ class Board extends Component {
       }
     }
   };
-  
-  
 
   handleNumberButtonClick = (number) => {
     //console.log("handleNumberButtonClick");
@@ -153,11 +149,12 @@ class Board extends Component {
 
   updateNumberCount = (selectedNumber) => {
     const { numberCount } = this.state;
-    
+
     // Update the count for the selectedNumber
     const updatedNumberCount = { ...numberCount };
-    updatedNumberCount[selectedNumber] = (updatedNumberCount[selectedNumber] || 0) + 1;
-    
+    updatedNumberCount[selectedNumber] =
+      (updatedNumberCount[selectedNumber] || 0) + 1;
+
     this.setState({ numberCount: updatedNumberCount });
   };
 
@@ -173,7 +170,7 @@ class Board extends Component {
     console.log("newBoard after initBoard:", newBoard);
 
     // Fill the board and poke holes based on difficulty
-    const holesToPoke = difficulty; // Assuming `difficulty` is the number of holes you want to poke
+    const holesToPoke = difficulty;
     const pokedBoard = Utils.pokeHoles(newBoard, holesToPoke);
     console.log("pokedBoard after pokeHoles:", pokedBoard);
 
@@ -233,27 +230,40 @@ class Board extends Component {
       disabledNumbers,
     } = this.state;
 
-    if (!board || board.length === 0) {
-      return (
-        <View>
-          <Text>Loading...</Text>
-        </View>
-      );
-    }
-
-    // if (!this.state.isGameInitialized) {
+    // if (!board || board.length === 0) {
     //   return (
-    //     <View style={styles.container}>
-    //       <Text>Welcome to the Sudoku Game!</Text>
-    //       <Pressable
-    //         style={styles.button}
-    //         onPress={() => this.startNewGame('medium')}
-    //       >
-    //         <Text style={styles.buttonText}>Start New Game</Text>
-    //       </Pressable>
+    //     <View>
+    //       <Text>Loading...</Text>
     //     </View>
     //   );
     // }
+
+    if (!this.state.isGameInitialized) {
+      return (
+        <View style={styles.container}>
+          <Text>Welcome to the Sudoku Game!</Text>
+          <Pressable
+            style={styles.button}
+            onPress={() => this.setState({ isPopupVisible: true })}
+          >
+            <Text style={styles.buttonText}>New Game</Text>
+          </Pressable>
+          <Modal
+            animationType="slide"
+            transparent={true}
+            visible={this.state.isPopupVisible}
+            onRequestClose={() => {
+              this.setState({ isPopupVisible: false });
+            }}
+          >
+            <DifficultyPopup
+              onClose={() => this.setState({ isPopupVisible: false })}
+              onStartNewGame={this.startNewGame}
+            />
+          </Modal>
+        </View>
+      );
+    }
 
     const rowComplete = board.map(
       (row) => new Set(row.filter((cell) => cell !== 0)).size === 9
@@ -280,7 +290,7 @@ class Board extends Component {
           numberCount={this.state.numberCount}
           selectedNumber={this.state.selectedNumber} // Pass down selectedNumber
         />
-        <DebugButtons pokeHolesInBoard={this.pokeHolesInBoard} />
+        {/* <DebugButtons pokeHolesInBoard={this.pokeHolesInBoard} /> */}
         <FeedbackArea feedbackMessage={this.state.feedbackMessage} />
         <Pressable
           style={styles.button}
