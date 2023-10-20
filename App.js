@@ -1,7 +1,9 @@
 import React, { Component } from 'react';
 import { View, StyleSheet } from 'react-native';
 import SudokuBoard from './SudokuBoard';
-import Board from './modules/Board';
+// import Board from './modules/Board';
+import Game from './modules/Game';
+
 
 class SudokuGame extends Component {
   constructor(props) {
@@ -31,7 +33,8 @@ class SudokuGame extends Component {
     return (
       <View style={styles.container}>
         {/* <SudokuBoard /> */}
-        <Board />
+        {/* <Board /> */}
+        <Game />
       </View>
     );
   }
