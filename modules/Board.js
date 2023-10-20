@@ -44,6 +44,7 @@ class Board extends Component {
       },
       disabledNumbers: new Set(),
       isPopupVisible: false,
+      isGameInitialized: false,
     };
   }
 
@@ -202,6 +203,7 @@ class Board extends Component {
       feedbackMessage: newFeedbackMessage,
       numberCount: newNumberCount,
       listOfSolutions: newListOfSolutions,
+      isGameInitialized: true,
       // ... set other state variables as needed
     });
   };
@@ -238,6 +240,20 @@ class Board extends Component {
         </View>
       );
     }
+
+    // if (!this.state.isGameInitialized) {
+    //   return (
+    //     <View style={styles.container}>
+    //       <Text>Welcome to the Sudoku Game!</Text>
+    //       <Pressable
+    //         style={styles.button}
+    //         onPress={() => this.startNewGame('medium')}
+    //       >
+    //         <Text style={styles.buttonText}>Start New Game</Text>
+    //       </Pressable>
+    //     </View>
+    //   );
+    // }
 
     const rowComplete = board.map(
       (row) => new Set(row.filter((cell) => cell !== 0)).size === 9
