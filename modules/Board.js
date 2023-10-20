@@ -1,12 +1,11 @@
 import React, { Component } from "react";
 import { View, Text, Modal, StyleSheet, Pressable } from "react-native";
 import * as Utils from "./SudokuUtils";
-import Grid from './Grid';
-import NumberButtons from './NumberButtons';
-import DebugButtons from './DebugButtons';
-import FeedbackArea from './FeedbackArea';
-import DifficultyPopup from './DifficultyPopup';
-
+import Grid from "./Grid";
+import NumberButtons from "./NumberButtons";
+import DebugButtons from "./DebugButtons";
+import FeedbackArea from "./FeedbackArea";
+import DifficultyPopup from "./DifficultyPopup";
 
 class Board extends Component {
   constructor(props) {
@@ -70,6 +69,7 @@ class Board extends Component {
     }
 
     this.setState({ board: filledBoard, listOfSolutions, numberCount });
+    console.log("Initial numberCount:", numberCount);
   }
 
   pokeHolesInBoard = (holes) => {
@@ -90,24 +90,23 @@ class Board extends Component {
   };
 
   handleCellPress = (row, col) => {
-    const { selectedNumber, board, incorrectCells, listOfSolutions } =
-      this.state;
-
+    const { selectedNumber, board, incorrectCells, listOfSolutions } = this.state;
+  
     if (board[row][col] !== 0) {
       console.warn("Cell is already filled");
       return;
     }
-
+  
     if (selectedNumber !== null) {
       const updatedBoard = [...board];
       updatedBoard[row][col] = selectedNumber;
       this.setState({ board: updatedBoard });
-
+  
       console.log(
         `Handling cell press at (${row}, ${col}) with number ${selectedNumber}`
       );
       console.log("Current listOfSolutions:", listOfSolutions);
-
+  
       const isValid = Utils.validateUserInput(
         row,
         col,
@@ -115,12 +114,11 @@ class Board extends Component {
         board,
         listOfSolutions
       );
-
+  
       console.log("Is move valid?", isValid);
-
-      this.updateNumberCount(selectedNumber, isValid); // Update the number count
-
+  
       if (isValid) {
+        this.updateNumberCount(selectedNumber);  // Update the number count only if the move is valid
         this.setState({ feedbackMessage: "Correct move!" });
       } else {
         this.setState({
@@ -128,6 +126,9 @@ class Board extends Component {
           incorrectCells: [...incorrectCells, { row, col }],
         });
 
+        // log number counts
+        console.log(" handle press numberCount:", this.state.numberCount);
+  
         setTimeout(() => {
           updatedBoard[row][col] = 0;
           this.setState({
@@ -137,62 +138,63 @@ class Board extends Component {
             ),
             feedbackMessage: "", // Clear the feedback message
           });
-          this.updateNumberCount(selectedNumber, false); // Reset the number count for the invalid move
         }, 2000); // 2 seconds delay
       }
     }
   };
+  
+  
 
   handleNumberButtonClick = (number) => {
     //console.log("handleNumberButtonClick");
     this.setState({ selectedNumber: number });
   };
 
-  updateNumberCount = (number, isValid) => {
-    this.setState((prevState) => {
-      const updatedNumberCount = { ...prevState.numberCount };
-      if (isValid) {
-        updatedNumberCount[number] -= 1;
-      } else {
-        updatedNumberCount[number] += 1;
-      }
-      return { numberCount: updatedNumberCount };
-    });
+  updateNumberCount = (selectedNumber) => {
+    const { numberCount } = this.state;
+    
+    // Update the count for the selectedNumber
+    const updatedNumberCount = { ...numberCount };
+    updatedNumberCount[selectedNumber] = (updatedNumberCount[selectedNumber] || 0) + 1;
+    
+    this.setState({ numberCount: updatedNumberCount });
   };
 
-  
   startNewGame = (difficulty) => {
     // Close the popup
     this.setState({ isPopupVisible: false });
-  
+
     // Log for debugging
     console.log("Starting new game with difficulty:", difficulty);
-  
+
     // Initialize a new blank board
-    const newBoard = Utils.initBoard(this.state.blankBoard);  // Assuming initBoard returns a new blank board when true is passed
+    const newBoard = Utils.initBoard(this.state.blankBoard); // Assuming initBoard returns a new blank board when true is passed
     console.log("newBoard after initBoard:", newBoard);
-  
+
     // Fill the board and poke holes based on difficulty
-    const holesToPoke = difficulty;  // Assuming `difficulty` is the number of holes you want to poke
+    const holesToPoke = difficulty; // Assuming `difficulty` is the number of holes you want to poke
     const pokedBoard = Utils.pokeHoles(newBoard, holesToPoke);
     console.log("pokedBoard after pokeHoles:", pokedBoard);
-  
+
     // Reinitialize list of solutions based on the newly poked board
     const newListOfSolutions = {};
     Utils.findAllSolutions(pokedBoard, newListOfSolutions);
     console.log("New list of solutions:", newListOfSolutions);
-  
+
     // Check if pokedBoard is valid
     if (!pokedBoard || pokedBoard.length === 0) {
       console.error("Invalid pokedBoard:", pokedBoard);
       return;
     }
-  
+
     // Reset incorrectCells, feedbackMessage, and numberCount
     const newIncorrectCells = [];
     const newFeedbackMessage = "";
     const newNumberCount = this.calculateNumberCount(pokedBoard);
-  
+
+    // console.log("New game numberCount:", this.state.numberCount);
+    console.log("New game numberCount:", newNumberCount);
+
     // Update the state
     this.setState({
       board: pokedBoard,
@@ -203,10 +205,7 @@ class Board extends Component {
       // ... set other state variables as needed
     });
   };
-  
-  
-  
-  
+
   // Custom function to calculate the count of each number on the board
   calculateNumberCount = (board) => {
     const count = {};
@@ -222,7 +221,6 @@ class Board extends Component {
     }
     return count;
   };
-  
 
   render() {
     const {
@@ -254,16 +252,18 @@ class Board extends Component {
 
     const gridComplete = Utils.isGridComplete(this.state.board);
 
-
-
-      return (
+    return (
       <View>
-        <Grid board={this.state.board} handleCellPress={this.handleCellPress} incorrectCells={this.state.incorrectCells} />
-        <NumberButtons 
-        handleNumberButtonClick={this.handleNumberButtonClick} 
-        numberCount={this.state.numberCount} 
-        selectedNumber={this.state.selectedNumber}  // Pass down selectedNumber
-      />
+        <Grid
+          board={this.state.board}
+          handleCellPress={this.handleCellPress}
+          incorrectCells={this.state.incorrectCells}
+        />
+        <NumberButtons
+          handleNumberButtonClick={this.handleNumberButtonClick}
+          numberCount={this.state.numberCount}
+          selectedNumber={this.state.selectedNumber} // Pass down selectedNumber
+        />
         <DebugButtons pokeHolesInBoard={this.pokeHolesInBoard} />
         <FeedbackArea feedbackMessage={this.state.feedbackMessage} />
         <Pressable
@@ -272,7 +272,7 @@ class Board extends Component {
         >
           <Text style={styles.buttonText}>New Game</Text>
         </Pressable>
-        
+
         <Modal
           animationType="slide"
           transparent={true}
